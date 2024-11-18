@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Xiaokang Wang</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
@@ -202,43 +202,128 @@
             line-height: 1.6;
         }
 
-        /* 滚动平滑效果 */
-        html {
-            scroll-behavior: smooth;
-            scroll-padding-top: 60px;
+        /* 响应式设计 - 平板和小屏幕笔记本 */
+        @media (max-width: 1024px) {
+            .nav-links {
+                gap: 20px;
+            }
+            
+            .right-column {
+                padding: 30px 40px;
+            }
         }
 
-        /* 响应式设计 */
+        /* 响应式设计 - 大手机和小平板 */
         @media (max-width: 768px) {
+            /* 导航栏适配 */
+            .navbar {
+                padding: 0.5rem;
+            }
+            
+            .nav-links {
+                gap: 3px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .nav-links a {
+                font-size: 15px;
+                padding: 6px 10px;
+                margin: 2px;
+            }
+
+            /* 主容器适配 */
             .main-container {
                 flex-direction: column;
+                margin-top: 80px;  /* 增加顶部间距，避免导航遮挡 */
             }
+
+            /* 左侧栏适配 */
             .left-column {
                 position: relative;
                 width: 100%;
                 height: auto;
+                padding: 15px;
+                padding-top: 20px;
             }
+
+            .profile-section {
+                padding-top: 10px;
+            }
+
+            .profile-image {
+                width: 140px;
+                height: 140px;
+            }
+
+            /* 右侧内容适配 */
             .right-column {
                 margin-left: 0;
-                padding: 20px;
-            }
-            .navbar {
                 padding: 15px;
-            }
-            .nav-links {
-                gap: 15px;
+                margin-top: 0;
             }
         }
 
-        /* 志愿服务部分样式 */
-        .volunteering-item {
-            margin-bottom: 30px;
+        /* 更小屏幕的适配（如 iPhone SE） */
+        @media (max-width: 375px) {
+            .navbar {
+                padding: 0.3rem;
+            }
+            
+            .nav-links a {
+                font-size: 12px;
+                padding: 4px 6px;
+                margin: 1px;
+            }
+
+            .profile-image {
+                width: 120px;
+                height: 120px;
+            }
+
+            .name {
+                font-size: 20px;
+            }
+
+            .right-column section h2 {
+                font-size: 22px;
+            }
+
+            .right-column section h3 {
+                font-size: 18px;
+            }
+
+            p, li {
+                font-size: 13px;
+            }
         }
 
-        .volunteering-item h3 {
-            color: #444;
-            font-size: 20px;
-            margin-bottom: 10px;
+        /* 横屏模式优化 */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .left-column {
+                padding-top: 10px;
+            }
+            
+            .profile-image {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .name {
+                font-size: 20px;
+                margin-bottom: 10px;
+            }
+        }
+
+        /* 触摸设备优化 */
+        @media (hover: none) {
+            .nav-links a:active {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+            
+            .profile-image:active {
+                transform: scale(0.98);
+            }
         }
     </style>
 </head>
@@ -300,8 +385,6 @@
                         <li>Running the R language for data analysis and visualisation on nearly 100,000 pieces of data.</li>
                     </ul>
                 </div>
-                
-                <!-- 其他研究项目类似格式 -->
             </section>
 
             <section id="activities">
@@ -314,7 +397,6 @@
                         <li>Led a band on stage in front of nearly 1,000 people and made a successful curtain call.</li>
                     </ul>
                 </div>
-                <!-- 其他活动类似格式 -->
             </section>
 
             <section id="volunteering">
@@ -353,19 +435,15 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // 原有的滚动检测代码...
-
-        // 页面加载时自动调整到 Education 部分
         const educationSection = document.querySelector('#education');
         if (educationSection) {
-            const offset = educationSection.offsetTop - 60; // 考虑导航栏高度
+            const offset = educationSection.offsetTop - 60;
             window.scrollTo({
                 top: offset,
-                behavior: 'instant' // 使用 instant 避免初始加载时的滚动动画
+                behavior: 'instant'
             });
         }
 
-        // 导航点击事件处理
         document.querySelectorAll('.nav-links a').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -384,4 +462,5 @@
     });
     </script>
 </body>
-</html> 
+</html>
+
