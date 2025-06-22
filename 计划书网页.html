@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心桥 (HeartLink) - 交互式商业计划书</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Serene Beige and Sage -->
+    <!-- Application Structure Plan: A single-page, narrative-driven structure is chosen to guide the user through the project's story, from the problem to the vision. It starts with an emotional hook (The Silent Struggle), presents the multi-faceted solution (HeartLink Ecosystem), identifies the target audience (Who We Serve), details the revenue streams (Business Blueprint), and concludes with competitive strengths and future goals (Our Promise & The Road Ahead). This thematic flow is more engaging and digestible for an interactive presentation than a rigid business plan format, facilitating better understanding of the project's core value proposition. Key interactions include tabbed content for the solution, interactive cards for user profiles, and a chart for growth projection to make data explorable. -->
+    <!-- Visualization & Content Choices:
+        - Core Challenges: Inform/Empathize -> Interactive Cards (HTML/CSS/JS) -> On-click reveals detailed text. Justification: Breaks down complex text into digestible, user-initiated chunks.
+        - Core Solution: Organize/Explain -> Tabbed Interface (HTML/CSS/JS) -> Separates App and Hardware concepts cleanly. Justification: Prevents information overload and provides clear navigation within a complex solution.
+        - User Personas: Compare/Inform -> Toggled Content Blocks (HTML/CSS/JS) -> Allows direct comparison of the two user groups. Justification: Highlights the dual-market strategy effectively.
+        - Business Model: Inform -> Structured HTML Table -> Displays pricing tiers clearly. Justification: A table is the most direct and standard way to present pricing information.
+        - Project Goals: Show Change/Inform -> Bar Chart (Chart.js/Canvas) -> Visualizes quantitative user growth targets. Justification: A bar chart is ideal for comparing discrete target numbers and showing future scale.
+        - Risk Mitigation: Organize/Inform -> Accordion UI (HTML/CSS/JS) -> Condenses a large block of text into a manageable, interactive list. Justification: Improves page scan-ability and reduces initial visual clutter.
+        - LLM Feature 1: Emotional Insight -> Text input, button trigger, LLM response. Goal: Provide personalized emotional reflection. Library: Gemini API (gemini-2.0-flash).
+        - LLM Feature 2: Meditation Guide Generation -> Button trigger, LLM generated text. Goal: Offer dynamic, personalized meditation scripts. Library: Gemini API (gemini-2.0-flash).
+        - All diagrams and icons are built with HTML/CSS/Tailwind and Unicode to adhere to the NO SVG/Image constraint. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #FDFBF8; /* A very light, warm beige */
+            color: #383838;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 40vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .tab-button.active {
+            background-color: #2D6A69; /* Dark Sage */
+            color: #FFFFFF;
+            border-color: #2D6A69;
+        }
+        .accordion-button span.icon {
+            transition: transform 0.3s ease;
+        }
+        .accordion-button.open span.icon {
+            transform: rotate(180deg);
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #2D6A69, #5A8F8D);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .section-fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .section-fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2D6A69;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="sticky top-0 bg-white/80 backdrop-blur-lg z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex justify-between items-center">
+                <div class="text-2xl font-bold gradient-text">心桥 <span class="font-light">HeartLink</span></div>
+                <div class="hidden md:flex space-x-8 text-gray-600">
+                    <a href="#challenge" class="hover:text-[#2D6A69] transition">核心挑战</a>
+                    <a href="#solution" class="hover:text-[#2D6A69] transition">解决方案</a>
+                    <a href="#users" class="hover:text-[#2D6A69] transition">服务对象</a>
+                    <a href="#model" class="hover:text-[#2D6A69] transition">商业模式</a>
+                    <a href="#vision" class="hover:text-[#2D6A69] transition">项目愿景</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-12 md:py-20">
+
+        <section id="hero" class="text-center mb-20 md:mb-32 section-fade-in">
+            <h1 class="text-4xl md:text-6xl font-bold mb-4">以科技为桥梁，构建心灵的港湾</h1>
+            <p class="text-lg md:text-xl text-gray-500 max-w-3xl mx-auto">
+                我们致力于打造一个私密、安全、非评判性的情绪疗愈与心理成长空间。因为我们相信，再先进的AI，也只有落到真实的人类情感上，才有意义。
+            </p>
+        </section>
+
+        <section id="challenge" class="mb-20 md:mb-32 section-fade-in">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">现代社会的五大心理痛点</h2>
+            <p class="text-center text-gray-500 mb-12 max-w-2xl mx-auto">我们关注那些难以言说，却又真实存在的挣扎。</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 transform hover:-translate-y-2 transition-transform duration-300">
+                    <div class="flex items-center justify-center h-16 w-16 rounded-full bg-teal-50 text-teal-600 mx-auto mb-4 text-3xl">🗣️</div>
+                    <h3 class="text-xl font-semibold text-center mb-2">情绪表达障碍</h3>
+                    <p class="text-gray-600 text-center text-sm">难以精确辨识和命名自身情绪，导致情绪处理能力受限。</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 transform hover:-translate-y-2 transition-transform duration-300">
+                    <div class="flex items-center justify-center h-16 w-16 rounded-full bg-teal-50 text-teal-600 mx-auto mb-4 text-3xl">🔒</div>
+                    <h3 class="text-xl font-semibold text-center mb-2">情感需求缺口</h3>
+                    <p class="text-gray-600 text-center text-sm">市场缺乏安全、私密、无压力的空间来处理负面情绪。</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 transform hover:-translate-y-2 transition-transform duration-300">
+                    <div class="flex items-center justify-center h-16 w-16 rounded-full bg-teal-50 text-teal-600 mx-auto mb-4 text-3xl">🧠</div>
+                    <h3 class="text-xl font-semibold text-center mb-2">心理亚健康</h3>
+                    <p class="text-gray-600 text-center text-sm">注意力不集中、脑雾、焦虑等问题广泛存在，影响生活品质。</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 transform hover:-translate-y-2 transition-transform duration-300">
+                    <div class="flex items-center justify-center h-16 w-16 rounded-full bg-teal-50 text-teal-600 mx-auto mb-4 text-3xl">👥</div>
+                    <h3 class="text-xl font-semibold text-center mb-2">社交孤立与信任危机</h3>
+                    <p class="text-gray-600 text-center text-sm">不愿或无法向亲友倾诉，对线上平台存在隐私和欺诈担忧。</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 transform hover:-translate-y-2 transition-transform duration-300">
+                    <div class="flex items-center justify-center h-16 w-16 rounded-full bg-teal-50 text-teal-600 mx-auto mb-4 text-3xl">💰</div>
+                    <h3 class="text-xl font-semibold text-center mb-2">传统疗愈高门槛</h3>
+                    <p class="text-gray-600 text-center text-sm">心理咨询费用昂贵，且社会文化中存在“病耻感”。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="solution" class="mb-20 md:mb-32 section-fade-in">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">我们的解决方案：心桥生态系统</h2>
+            <p class="text-center text-gray-500 mb-12 max-w-2xl mx-auto">一个由移动应用和创新硬件构成的，科技与人文深度融合的心灵陪伴系统。</p>
+            <div class="bg-white rounded-2xl shadow-xl p-4 md:p-8">
+                <div class="flex justify-center border-b border-gray-200 mb-8">
+                    <button class="tab-button text-lg font-medium py-3 px-6 border-b-2 border-transparent transition active" data-tab="app">核心应用 App</button>
+                    <button class="tab-button text-lg font-medium py-3 px-6 border-b-2 border-transparent transition" data-tab="hardware">创新手环 Hardware</button>
+                </div>
+
+                <div id="app" class="tab-content">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4 gradient-text">懂你的智能应用</h3>
+                            <ul class="space-y-4 text-gray-700">
+                                <li class="flex items-start">
+                                    <span class="text-teal-500 mr-3 mt-1">●</span>
+                                    <div>
+                                        <h4 class="font-semibold">情绪识别与可视化</h4>
+                                        <p class="text-sm">通过文本或语音，AI精确分析情绪状态，并用直观的“情绪坐标图”呈现，帮您看清内心世界。</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-teal-500 mr-3 mt-1">●</span>
+                                    <div>
+                                        <h4 class="font-semibold">AI智能体疏导 (核心)</h4>
+                                        <p class="text-sm">可克隆亲友声音，在您自己的设备上本地运行，提供极致私密、温暖熟悉的陪伴与专业心理学引导。</p>
+                                    </div>
+                                </li>
+                                 <li class="flex items-start">
+                                    <span class="text-teal-500 mr-3 mt-1">●</span>
+                                    <div>
+                                        <h4 class="font-semibold">个性化疗愈模块</h4>
+                                        <p class="text-sm">提供“搭积木”式的心理训练课程与可选的佛教主题内容，满足多元化、个性化的心灵成长需求。</p>
+                                    </div>
+                                </li>
+                            </ul>
+
+                            <div class="mt-8 p-6 bg-teal-50 rounded-xl">
+                                <h4 class="text-xl font-bold mb-4 text-teal-800">✨ 情绪智能洞察</h4>
+                                <textarea id="emotionalInsightInput" class="w-full p-3 rounded-md border border-gray-300 mb-3 focus:ring-teal-500 focus:border-teal-500" rows="4" placeholder="写下您现在的心情，比如“我今天工作压力很大，感觉有点沮丧”..."></textarea>
+                                <button id="getInsightBtn" class="bg-[#2D6A69] hover:bg-[#5A8F8D] text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                                    获取智能洞察
+                                    <span id="insightLoading" class="loading-spinner hidden"></span>
+                                </button>
+                                <div id="emotionalInsightOutput" class="mt-4 p-3 bg-white rounded-md border border-gray-200 text-gray-700 min-h-[50px] flex items-center">
+                                    洞察结果将显示在这里。
+                                </div>
+                            </div>
+
+                            <div class="mt-8 p-6 bg-teal-50 rounded-xl">
+                                <h4 class="text-xl font-bold mb-4 text-teal-800">✨ 冥想引导生成</h4>
+                                <button id="generateMeditationBtn" class="bg-[#2D6A69] hover:bg-[#5A8F8D] text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                                    生成冥想引导语
+                                    <span id="meditationLoading" class="loading-spinner hidden"></span>
+                                </button>
+                                <div id="meditationGuideOutput" class="mt-4 p-3 bg-white rounded-md border border-gray-200 text-gray-700 min-h-[50px]">
+                                    生成的冥想引导语将显示在这里。
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-teal-50 rounded-xl p-8 flex items-center justify-center h-full">
+                            <div class="text-center">
+                                <span class="text-6xl">📱</span>
+                                <p class="mt-4 font-medium text-teal-800">本地部署，数据不出设备<br>极致隐私，绝对安全</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="hardware" class="tab-content hidden">
+                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                        <div class="bg-stone-100 rounded-xl p-8 flex items-center justify-center h-full">
+                             <div class="text-center">
+                                <span class="text-6xl">💎</span>
+                                <p class="mt-4 font-medium text-stone-800">将科技融入玉石珠宝<br>产品即信物，美观且智能</p>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4 gradient-text">会关怀的智能手环</h3>
+                            <ul class="space-y-4 text-gray-700">
+                                <li class="flex items-start">
+                                    <span class="text-teal-500 mr-3 mt-1">●</span>
+                                    <div>
+                                        <h4 class="font-semibold">情绪波动预警</h4>
+                                        <p class="text-sm">高精度传感器实时监测生理指标，通过AI算法判断情绪波动，并向App发出提醒。</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-teal-500 mr-3 mt-1">●</span>
+                                    <div>
+                                        <h4 class="font-semibold">“无声关怀”双向互动</h4>
+                                        <p class="text-sm">当一方情绪波动，另一方App会收到匿名提醒。满足“期待你主动关怀，但又不愿打扰”的微妙心理。</p>
+                                    </div>
+                                </li>
+                                 <li class="flex items-start">
+                                    <span class="text-teal-500 mr-3 mt-1">●</span>
+                                    <div>
+                                        <h4 class="font-semibold">高端美学设计</h4>
+                                        <p class="text-sm">将传感器融入玉石、珠宝等传统饰品，兼顾美观与佩戴意愿，精准切入高端市场。</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="users" class="mb-20 md:mb-32 section-fade-in">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">我们为谁服务</h2>
+            <p class="text-center text-gray-500 mb-12 max-w-2xl mx-auto">我们关注两大核心用户群体，并通过亲情连接策略，实现双向触达。</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+                    <h3 class="text-2xl font-bold mb-4">中年女性 (35-65岁)</h3>
+                    <ul class="space-y-2 text-gray-600">
+                        <li class="flex"><span class="mr-2 text-teal-500">✔</span>面临情感压抑、家庭关系压力</li>
+                        <li class="flex"><span class="mr-2 text-teal-500">✔</span>对衰老和被忽视感到恐惧</li>
+                        <li class="flex"><span class="mr-2 text-teal-500">✔</span>愿意为“情绪价值”和“心灵成长”付费</li>
+                        <li class="flex"><span class="mr-2 text-teal-500">✔</span>渴望被理解，寻求心灵慰藉</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+                    <h3 class="text-2xl font-bold mb-4">年轻女性 (20-35岁)</h3>
+                     <ul class="space-y-2 text-gray-600">
+                        <li class="flex"><span class="mr-2 text-teal-500">✔</span>面对快节奏、高压力的生活</li>
+                        <li class="flex"><span class="mr-2 text-teal-500">✔</span>对AI及智能设备接受度高</li>
+                        <li class="flex"><span class="mr-2 text-teal-500">✔</span>注重自我成长，消费观念前卫</li>
+                        <li class="flex"><span class="mr-2 text-teal-500">✔</span>与父母关系密切，是天然的情感连接点</li>
+                    </ul>
+                </div>
+            </div>
+             <div class="mt-8 bg-teal-50 text-teal-800 p-6 rounded-2xl text-center">
+                <p class="font-semibold">🎯 战略情感杠杆：将产品定位为子女赠予父母的“一份懂你的爱”，实现双用户群体的同步覆盖。</p>
+            </div>
+        </section>
+
+        <section id="model" class="mb-20 md:mb-32 section-fade-in">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">商业模式设计</h2>
+            <p class="text-center text-gray-500 mb-12 max-w-2xl mx-auto">采纳免费增值与高端付费相结合的策略，并长期规划构建健康生态平台。</p>
+            <div class="overflow-x-auto bg-white rounded-2xl shadow-xl p-4 md:p-8">
+                <table class="w-full text-left">
+                    <thead class="border-b-2 border-gray-200">
+                        <tr>
+                            <th class="p-4 font-semibold text-gray-700">模块/收费方式</th>
+                            <th class="p-4 font-semibold text-gray-700">价值主张</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <tr>
+                            <td class="p-4 font-medium">App基础功能 (免费)</td>
+                            <td class="p-4 text-gray-600">提供情绪自测、基础报告、部分音乐与冥想，吸引用户建立信任。</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-medium">AI智能体情绪疏导 (订阅)</td>
+                            <td class="p-4 text-gray-600">核心付费服务，提供深度、私密的AI心理辅导。初期可推优惠价。</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-medium">亲友声音克隆 (高级)</td>
+                            <td class="p-4 text-gray-600">高级功能，单独定价。提供高度私密、高情感浓度的独特体验。</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-medium">高级心理训练课程 (按需)</td>
+                            <td class="p-4 text-gray-600">按模块单独收费，满足用户个性化的系统成长需求。</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-medium">情绪感知手环 (硬件)</td>
+                            <td class="p-4 text-gray-600">高溢价一次性购买。融合美学、智能与情感连接的价值。</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-medium">生态平台 (长期战略)</td>
+                            <td class="p-4 text-gray-600">邀请高品质商家入驻，收取入驻费或佣金，实现平台经济收益。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="risks" class="mb-20 md:mb-32 section-fade-in">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">风险应对与解决方案</h2>
+            <p class="text-center text-gray-500 mb-12 max-w-2xl mx-auto">我们深知创新面临的挑战，并已制定清晰的应对策略。</p>
+            <div class="space-y-4">
+                <div class="bg-white rounded-xl border border-gray-100">
+                    <button class="accordion-button w-full flex justify-between items-center text-left p-5 text-lg font-semibold">
+                        隐私泄露与欺诈风险？
+                        <span class="icon text-teal-500 text-2xl">▸</span>
+                    </button>
+                    <div class="accordion-content px-5 pb-5 text-gray-600">
+                        <p><strong>核心技术壁垒：本地部署，数据不上传云端。</strong> 用户的语音、情绪日志等敏感信息均在用户设备本地进行处理，从根本上杜绝数据泄露风险。App内设防欺诈教育，AI对话中若检测到敏感财务信息要求，将立即发出风险提示。</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl border border-gray-100">
+                    <button class="accordion-button w-full flex justify-between items-center text-left p-5 text-lg font-semibold">
+                        是否存在伪装宗教应用之嫌？
+                        <span class="icon text-teal-500 text-2xl">▸</span>
+                    </button>
+                    <div class="accordion-content px-5 pb-5 text-gray-600">
+                        <p><strong>内容中立性与用户自主选择权。</strong> 佛教内容系纯粹的可选模块，非强制功能。AI对话核心围绕心理健康疏导，不涉及任何传教。用户拥有完全的自主选择权，可随时启用或禁用相关内容。</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl border border-gray-100">
+                    <button class="accordion-button w-full flex justify-between items-center text-left p-5 text-lg font-semibold">
+                        中年用户操作难度问题？
+                        <span class="icon text-teal-500 text-2xl">▸</span>
+                    </button>
+                    <div class="accordion-content px-5 pb-5 text-gray-600">
+                        <p><strong>极致简化用户界面与多媒体教学支持。</strong> 采用大字体、清晰图标和最小化操作步骤。提供详细的视频及图文教程，并强调子女可协助父母安装教学，利用亲情连接解决初期使用障碍。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="vision" class="mb-20 md:mb-32 section-fade-in">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">项目目标与愿景</h2>
+            <p class="text-center text-gray-500 mb-12 max-w-2xl mx-auto">我们旨在从单一App进化为领先的智能心理疗愈平台，让科技更懂人心。</p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                <div>
+                    <h3 class="text-2xl font-bold mb-4 gradient-text">我们的发展蓝图</h3>
+                    <ul class="space-y-6">
+                        <li>
+                            <h4 class="text-xl font-semibold">短期目标 (1-2年)</h4>
+                            <p class="text-gray-600">成功切入市场，服务超50万用户，建立品牌声誉。验证核心付费模式与硬件市场接受度。</p>
+                        </li>
+                        <li>
+                            <h4 class="text-xl font-semibold">中期目标 (3-5年)</h4>
+                            <p class="text-gray-600">成为国内领先平台，用户规模破300万。硬件销售形成稳定增长，构建完善的生态系统。</p>
+                        </li>
+                         <li>
+                            <h4 class="text-xl font-semibold">长期愿景</h4>
+                            <p class="text-gray-600">成为全球连接科技与情感的标杆，赋能更多个体，实现社会价值与商业价值的统一。</p>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-white p-8 rounded-2xl shadow-lg">
+                    <h3 class="text-xl font-bold text-center mb-4">用户增长目标</h3>
+                    <div class="chart-container">
+                        <canvas id="growthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-gray-800 text-white mt-20">
+        <div class="container mx-auto px-6 py-8 text-center">
+            <p class="text-2xl font-bold">心桥 <span class="font-light">HeartLink</span></p>
+            <p class="text-gray-400 mt-2">连接科技与情感，疗愈每一个心灵。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const apiKey = ""; 
+
+            const getInsightBtn = document.getElementById('getInsightBtn');
+            const emotionalInsightInput = document.getElementById('emotionalInsightInput');
+            const emotionalInsightOutput = document.getElementById('emotionalInsightOutput');
+            const insightLoading = document.getElementById('insightLoading');
+
+            const generateMeditationBtn = document.getElementById('generateMeditationBtn');
+            const meditationGuideOutput = document.getElementById('meditationGuideOutput');
+            const meditationLoading = document.getElementById('meditationLoading');
+
+            async function callGeminiAPI(prompt, outputElement, loadingElement) {
+                loadingElement.classList.remove('hidden');
+                outputElement.textContent = ''; 
+
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+                    
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        outputElement.textContent = text;
+                    } else {
+                        outputElement.textContent = '未能获取洞察，请稍后再试。';
+                        console.error('Gemini API returned unexpected structure:', result);
+                    }
+                } catch (error) {
+                    outputElement.textContent = '请求失败，请检查网络或稍后再试。';
+                    console.error('Error calling Gemini API:', error);
+                } finally {
+                    loadingElement.classList.add('hidden');
+                }
+            }
+
+            if (getInsightBtn) {
+                getInsightBtn.addEventListener('click', () => {
+                    const userFeeling = emotionalInsightInput.value.trim();
+                    if (userFeeling) {
+                        const prompt = `请分析以下情绪描述，并提供一个简短、温暖且专业的洞察：\n\n"${userFeeling}"\n\n洞察应关注情绪的本质，并给予积极引导，字数不超过50字。`;
+                        callGeminiAPI(prompt, emotionalInsightOutput, insightLoading);
+                    } else {
+                        emotionalInsightOutput.textContent = '请输入您的心情。';
+                    }
+                });
+            }
+
+            if (generateMeditationBtn) {
+                generateMeditationBtn.addEventListener('click', () => {
+                    const prompt = `请生成一段简短（约50-80字）、积极、舒缓的中文冥想引导语。这段引导语应侧重于平静内心，关注呼吸，并提供放松的意象。`;
+                    callGeminiAPI(prompt, meditationGuideOutput, meditationLoading);
+                });
+            }
+
+
+            // Tab switching logic
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+
+                    const tabId = button.dataset.tab;
+                    tabContents.forEach(content => {
+                        if (content.id === tabId) {
+                            content.classList.remove('hidden');
+                        } else {
+                            content.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+
+            // Accordion logic
+            document.querySelectorAll('.accordion-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const content = button.nextElementSibling;
+                    const icon = button.querySelector('.icon');
+                    button.classList.toggle('open');
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        icon.style.transform = 'rotate(90deg)';
+                    } 
+                });
+            });
+
+
+            // Chart.js initialization
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['短期目标 (1-2年)', '中期目标 (3-5年)'],
+                    datasets: [{
+                        label: '目标用户数 (万)',
+                        data: [50, 300],
+                        backgroundColor: [
+                            'rgba(90, 143, 141, 0.6)', 
+                            'rgba(45, 106, 105, 0.6)'
+                        ],
+                        borderColor: [
+                            '#5A8F8D',
+                            '#2D6A69'
+                        ],
+                        borderWidth: 1,
+                        borderRadius: 8,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y + ' 万';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '用户数 (万)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Smooth scroll for nav links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            // Fade-in sections on scroll
+            const sections = document.querySelectorAll('.section-fade-in');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+            
+            setTimeout(() => {
+               sections.forEach(section => {
+                    const rect = section.getBoundingClientRect();
+                    if (rect.top <= window.innerHeight && rect.bottom >= 0) {
+                        section.classList.add('visible');
+                    }
+                });
+            }, 100);
+
+        });
+    </script>
+</body>
+</html>
